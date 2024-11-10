@@ -1,31 +1,23 @@
-#DIRECTORIES
-CMD_DIR := command
-BIN_DIR := bin
+# Directories
 SHELL_DIR := shell
-INCLUDE_DIR := include
+COMMAND_DIR := command
+BIN_DIR := bin
 
-#CMD SRC FILES (REMOVE .c)
-COMMANDS := ls cat grep  
+# Default target to build everything
+all: $(BIN_DIR)
+	$(MAKE) -C $(SHELL_DIR)
+	$(MAKE) -C $(COMMAND_DIR)
 
-#COMPILER CONF
-CC := gcc
-CFLAGS := -I$(INCLUDE_DIR) -Wall
+# Run the shell program
+run: all
+	./$(BIN_DIR)/osh
 
-#COMPILE COMMANDS IN BIN DIR
-$(BIN_DIR)/%: $(CMD_DIR)/%.c | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $<
-
-#CREATE BIN
+# Create bin directory if it doesn't exist
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-#COMPILE SHELL BIN
-$(BIN_DIR)/osh: $(SHELL_DIR)/shell.c $(INCLUDE_DIR)/shell.h | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $<
-
-# Target to build all commands and the main shell as osh
-all: $(COMMANDS:%=$(BIN_DIR)/%) $(BIN_DIR)/osh
-
-#CLEAN REMOVES ALL BIN
+# Clean target to remove binaries in both shell and command directories
 clean:
+	$(MAKE) -C $(SHELL_DIR) clean
+	$(MAKE) -C $(COMMAND_DIR) clean
 	rm -rf $(BIN_DIR)
