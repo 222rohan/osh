@@ -6,6 +6,50 @@
 #include <dirent.h>
 #include <unistd.h>
 
+void delete_file(const char *file_path, int verbose) {
+    if (verbose) {
+        printf("Deleting file: %s\n", file_path);
+    }
+
+    if (remove(file_path) != 0) {
+        perror("Error deleting file");
+    }
+}
+
+void delete_directory(const char *directory_path, int verbose) {
+    DIR *dir = opendir(directory_path);
+    if (!dir) {
+        perror("Error opening directory for deletion");
+        return;
+    }
+
+    struct dirent *entry;
+    char path[1024];
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s", directory_path, entry->d_name);
+
+        if (entry->d_type == DT_DIR) {
+            delete_directory(path, verbose);
+        } else {
+            delete_file(path, verbose);
+        }
+    }
+
+    closedir(dir);
+
+    if (verbose) {
+        printf("Deleting directory: %s\n", directory_path);
+    }
+
+    if (rmdir(directory_path) != 0) {
+        perror("Error deleting directory");
+    }
+}
+
 void copy_file(const char *source, const char *destination, int force, int verbose) {
     if (verbose) {
         printf("Copying file: %s to %s\n", source, destination);
@@ -34,16 +78,6 @@ void copy_file(const char *source, const char *destination, int force, int verbo
 
     fclose(src);
     fclose(dest);
-}
-
-void delete_file(const char *file_path, int verbose) {
-    if (verbose) {
-        printf("Deleting file: %s\n", file_path);
-    }
-
-    if (remove(file_path) != 0) {
-        perror("Error deleting file");
-    }
 }
 
 void copy_directory(const char *source_dir, const char *dest_dir, int force, int verbose) {
@@ -87,39 +121,6 @@ void copy_directory(const char *source_dir, const char *dest_dir, int force, int
     }
 
     closedir(dir);
-}
-void delete_directory(const char *directory_path, int verbose) {
-    DIR *dir = opendir(directory_path);
-    if (!dir) {
-        perror("Error opening directory for deletion");
-        return;
-    }
-
-    struct dirent *entry;
-    char path[1024];
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-            continue;
-
-        snprintf(path, sizeof(path), "%s/%s", directory_path, entry->d_name);
-
-        if (entry->d_type == DT_DIR) {
-            delete_directory(path, verbose);
-        } else {
-            delete_file(path, verbose);
-        }
-    }
-
-    closedir(dir);
-
-    if (verbose) {
-        printf("Deleting directory: %s\n", directory_path);
-    }
-
-    if (rmdir(directory_path) != 0) {
-        perror("Error deleting directory");
-    }
 }
 
 void print_usage(const char *program_name) {
