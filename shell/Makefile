@@ -9,11 +9,14 @@ CFLAGS := -I$(INCLUDE_DIR) -Wall
 # TARGET BINARY
 TARGET := $(BIN_DIR)/osh
 
-# COMPILE SHELL BINARY
-$(TARGET): shell.c $(INCLUDE_DIR)/shell.h | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $<
+# SOURCE FILES
+SOURCES := shell.c builtin.c
 
-# Default target to build the shell
+# COMPILE SHELL BINARY
+$(TARGET): $(SOURCES) $(INCLUDE_DIR)/shell.h $(INCLUDE_DIR)/builtin.h | $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ $(SOURCES)
+
+# DEFAULT TARGET
 all: $(TARGET)
 
 # CLEAN TARGET

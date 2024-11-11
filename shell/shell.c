@@ -2,6 +2,7 @@
 
 //contains all definitions for the shell
 #include "../include/shell.h"
+#include "../include/builtin.h"
 
 //shell constants
 int is_interactive = INTERACTIVE;
@@ -9,8 +10,19 @@ int last_exit_status = 0;
 char *SH_PATH;
 
 //built-in commands
-char *builtins[] = {"cd", "exit"};
-// int (*builtins_fn[])(char **) = {&bi_cd, &bi_exit};
+char *builtins[] = {
+    "cd",
+    "exit",
+    "help",
+    "status"
+    };
+    
+int (*builtins_fn[])(char **) = {
+    &bi_cd, 
+    &bi_exit, 
+    &bi_help,
+    &bi_status
+    };
 
 //function definitions
 
@@ -42,11 +54,17 @@ void run_shell_loop(void) {
         prompt();
         if(read_line(line)) {   
             run_status = run_line(line);
+
             if(run_status == RUN_CMD_NOTFOUND) {
                 printf("%sosh: %scommand not found%s\n", RED, YELLOW, RESET);
+            } else if(run_status == RUN_FAILURE) {
+                printf("%sosh: %sunexpected error%s\n", RED, YELLOW, RESET);
+            } else if(run_status == RUN_FILE_NOTFOUND) {
+                printf("%sosh: %sfile not found%s\n", RED, YELLOW, RESET);
             }
-        }
+
         memset(line, 0, MAX_BUFFER_LEN);
+        }
     }
 }
 
@@ -71,10 +89,10 @@ int read_line(char *line) {
 }
 
 int run_line(char *line) {
-    char *args[MAX_ARG_COUNT];
+    char *args[MAX_ARG_COUNT] = {0};
     int arg_count = parse_line(line, args);
     if (arg_count == 0) {
-        return RUN_FAILURE;
+        return RUN_DO_NOTHING;
     }
     int bi_index = get_builtin(args[0]);
     if (bi_index != -1) {
@@ -95,7 +113,7 @@ int parse_line(char *line, char **args) {
 }
 
 int get_builtin(char *cmd) {
-    for (int i = 0; i < 0; i++) {
+    for(int i = 0; i < sizeof(builtins) / sizeof(char *); i++) {
         if (strcmp(cmd, builtins[i]) == 0) {
             return i;
         }
@@ -104,8 +122,7 @@ int get_builtin(char *cmd) {
 }
 
 int exec_fn_builtin(int bi_index, char **args) {
-    //return builtins_fn[bi_index](args);
-    return 0;
+    return builtins_fn[bi_index](args);
 }
 
 char *get_shell_dir() {
@@ -127,10 +144,12 @@ char *get_shell_dir() {
 
 int exec_cmd_ext(char **args) {
     char cmd_path[1024];
+    int cmd = 1;
 
 //case 1: absolute path is provided
     if (args[0][0] == '/' || args[0][0] == '.') {
         strcpy(cmd_path, args[0]);
+        cmd = 0;
 //case 2: search in PATH
     } else {
         snprintf(cmd_path, sizeof(cmd_path), "%s/%s", SH_PATH, args[0]);
@@ -138,7 +157,11 @@ int exec_cmd_ext(char **args) {
     pid_t pid = fork();
     if (pid == 0) {
         if (execvp(cmd_path, args) == -1) {
-            return RUN_CMD_NOTFOUND;
+            if(cmd) {
+                return RUN_CMD_NOTFOUND;
+            } else {
+                return RUN_FILE_NOTFOUND;
+            }
         }
     } else if (pid < 0) {
         perror("fork");

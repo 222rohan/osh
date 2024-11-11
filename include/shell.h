@@ -9,18 +9,23 @@
 
 
 // shell constants
-#define MAX_BUFFER_LEN 1024        // Maximum length of a command
-#define MAX_ARG_COUNT 64        // Maximum number of arguments per command
-#define INTERACTIVE 1           // Interactive mode
-#define RUN_SUCCESS 1           // Command run successfully
-#define RUN_FAILURE -1              // General failure
-#define RUN_CMD_NOTFOUND -2             // Command not found
+#define MAX_BUFFER_LEN 1024                         // Maximum length of a command
+#define MAX_ARG_COUNT 64                            // Maximum number of arguments per command
+#define INTERACTIVE 1                               // Interactive mode
 
-extern int is_interactive;                      // Flag to indicate whether the shell is in interactive mode
-extern int last_exit_status;                      // Exit status of the last executed command/binary
-extern char *SH_PATH;                          // Path to the shell executable
-extern char *builtins[];                        // Built-in commands
-extern int (*builtins_fn[])(char **);              // Built-in command functions
+// shell return codes
+#define RUN_SUCCESS 1                               // Command run successfully
+#define RUN_DO_NOTHING 0                            // Do nothing
+#define RUN_FAILURE -1                              // unexpected failure
+#define RUN_CMD_NOTFOUND -2                         // Command not found
+#define RUN_FILE_NOTFOUND -3                        // File not found
+
+// shell members
+extern int is_interactive;                          // Flag to indicate whether the shell is in interactive mode
+extern int last_exit_status;                        // Holds exit status of the last executed file
+extern char *SH_PATH;                               // Hold path to the shell executable
+extern char *builtins[];                            // Built-in command names
+extern int (*builtins_fn[])(char **);               // Function pointers to built-in commands
 
 //formatting
 #define RESET "\033[0m"
