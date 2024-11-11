@@ -129,29 +129,12 @@ int exec_cmd_ext(char **args) {
     char cmd_path[1024];
 
 //case 1: absolute path is provided
-    if (args[0][0] == '/') {
-
-        pid_t pid = fork();
-        if (pid == 0) {
-            if (execvp(args[0], args) == -1) {
-                perror("execvp");
-                exit(RUN_CMD_NOTFOUND);
-            }
-        } else if (pid < 0) {
-            perror("fork");
-            return RUN_FAILURE;
-        } else {
-            int status;
-            waitpid(pid, &status, 0);
-            last_exit_status = WEXITSTATUS(status);
-        }
-
-        return RUN_SUCCESS;
-    }
-
+    if (args[0][0] == '/' || args[0][0] == '.') {
+        strcpy(cmd_path, args[0]);
 //case 2: search in PATH
-    snprintf(cmd_path, sizeof(cmd_path), "%s/%s", SH_PATH, args[0]);
-
+    } else {
+        snprintf(cmd_path, sizeof(cmd_path), "%s/%s", SH_PATH, args[0]);
+    }
     pid_t pid = fork();
     if (pid == 0) {
         if (execvp(cmd_path, args) == -1) {
