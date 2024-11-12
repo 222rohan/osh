@@ -3,11 +3,16 @@
 //contains all definitions for the shell
 #include "../include/shell.h"
 #include "../include/builtin.h"
+#include <termios.h>
+#include <unistd.h>
 
 //shell constants
 int is_interactive = INTERACTIVE;
 int last_exit_status = 0;
 char *SH_PATH;
+char command_history[100][MAX_BUFFER_LEN];
+int history_index = 0;  // Index for the latest command
+int current_index = -1; // Index for navigating through history
 
 //built-in commands
 char *builtins[] = {
@@ -76,17 +81,90 @@ void prompt(void) {
     }
 }
 
+void enable_raw_mode(struct termios *original_termios) {
+    struct termios raw = *original_termios;
+    raw.c_lflag &= ~(ICANON | ECHO); // Turn off canonical mode and echo
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+}
+
+void disable_raw_mode(struct termios *original_termios) {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, original_termios);
+}
+
+
 int read_line(char *line) {
-    if (fgets(line, MAX_BUFFER_LEN, stdin) == NULL) {
-        printf("\n");
-        return 0;
+    struct termios original_termios;
+    tcgetattr(STDIN_FILENO, &original_termios); 
+    enable_raw_mode(&original_termios);         
+
+    int ch, i = 0;
+    int is_arrow_key = 0;
+
+    while (1) {
+        ch = getchar();
+
+        if (ch == '\033') { 
+            is_arrow_key = 1;
+            continue;
+        } else if (is_arrow_key == 1 && ch == '[') {
+            is_arrow_key = 2;
+            continue;
+        } else if (is_arrow_key == 2 && ch == 'A') { 
+            if (current_index > 0) {
+                current_index--;
+                strcpy(line, command_history[current_index]); 
+                printf("\033[2K\r");
+                prompt();
+                printf("%s", line); 
+                i = strlen(line); 
+            }
+            is_arrow_key = 0;
+            continue;
+        } else if (is_arrow_key == 2 && ch == 'B') { 
+            if (current_index < 100) {
+                current_index++;
+                strcpy(line, command_history[current_index]); 
+                printf("\033[2K\r");
+                prompt();
+                printf("%s", line); 
+                i = strlen(line); 
+            }
+            is_arrow_key = 0;
+            continue;
+        }else {
+            is_arrow_key = 0; 
+        }
+
+
+        if (ch == '\n' || ch == EOF) {
+            if (i > 0) { 
+                line[i] = '\0';
+                strcpy(command_history[history_index], line); 
+                history_index = (history_index + 1) % 100; 
+                current_index = history_index; 
+            }
+            putchar(ch); 
+            break;
+        } else if (ch == 127 || ch == '\b') { 
+            if (i > 0) {
+                i--;
+                printf("\b \b"); 
+            }
+        } else if (i < MAX_BUFFER_LEN - 1) {
+            line[i++] = (char)ch;
+            putchar(ch); 
+        }
     }
-    int len = strlen(line);
-    if (line[len - 1] == '\n') {
-        line[len - 1] = '\0';
+    line[i] = '\0'; 
+    disable_raw_mode(&original_termios); 
+
+    if (ch == EOF && i == 0) {
+        printf("\n");
+        return 0; 
     }
     return 1;
 }
+
 
 int run_line(char *line) {
     char *args[MAX_ARG_COUNT] = {0};
