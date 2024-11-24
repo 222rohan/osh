@@ -16,6 +16,7 @@ void concatenate(char *files[], int n){
         }
         fclose(fptr);
         //printf("%s\n", files[i]);
+        printf("\n");
     }
     return;
 }
