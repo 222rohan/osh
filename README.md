@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/943cb3de-1f4f-45ab-94c2-a653e93e7e74)# osh 
+# osh 
 ## operating systems shell
 This project implements a simple shell program written in C. The shell supports interactive mode, external command execution, built-in commands, and history navigation using arrow keys.
 
