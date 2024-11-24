@@ -1,0 +1,4 @@
+this is a test file
+to check if all the commands work as they should
+
+THIS IS A TEST
