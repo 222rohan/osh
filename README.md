@@ -1,4 +1,4 @@
-# osh 
+![image](https://github.com/user-attachments/assets/943cb3de-1f4f-45ab-94c2-a653e93e7e74)# osh 
 ## operating systems shell
 This project implements a simple shell program written in C. The shell supports interactive mode, external command execution, built-in commands, and history navigation using arrow keys.
 
@@ -81,5 +81,31 @@ The project uses a recursive Makefile structure where source and header files (f
   ![image](https://github.com/user-attachments/assets/6e65b4f5-50b1-4017-b2da-fbbf064bf3ba)
   ![image](https://github.com/user-attachments/assets/a00a66d7-f179-4015-a643-6d7c6fa7d228)
   ![image](https://github.com/user-attachments/assets/d6a78754-f9dd-44ef-88ec-a85272642b63)
+
+## cat [FILE]...
+- print the file content(s)
+- concatentates the file content if multiple files provided
+
+![image](https://github.com/user-attachments/assets/bccf3c8b-b3c1-4b86-a59c-840e84c3f86e)
+![image](https://github.com/user-attachments/assets/0f07b43b-cdd3-4795-9eed-8ecf7103370c)
+
+## ls [OPTIONS]... [PATH]
+- list the contents of the current working directory
+- [OPTIONS]:
+    - -a: include hidden files/directories
+    - -l: output in form of a list
+
+![image](https://github.com/user-attachments/assets/69fbb9b4-868c-4d7a-aa9d-85f7da36b71a)
+
+
+## grep [OPTIONS]... [PATTERN] [FILE]
+- list the contents of the current working directory
+- [OPTIONS]:
+    - -i: ignore case in search
+- [PATTERN]: the pattern to be searched in the given file(s)
+
+![image](https://github.com/user-attachments/assets/200a15ba-f353-43a6-b9b5-00bc48b539f1)
+![image](https://github.com/user-attachments/assets/d4139713-0758-4edb-a391-fd305abe9e02)
+
 
 
